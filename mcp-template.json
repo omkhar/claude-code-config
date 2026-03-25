@@ -1,12 +1,10 @@
 {
   "mcpServers": {
     "context7": {
-      "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp@2.1.4"]
+      "command": "context7-mcp"
     },
     "exa": {
-      "command": "npx",
-      "args": ["-y", "exa-mcp-server@3.1.9"],
+      "command": "exa-mcp-server",
       "env": {
         "EXA_API_KEY": "${EXA_API_KEY:-}"
       }

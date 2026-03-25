@@ -29,10 +29,8 @@ class RepoContractTests(unittest.TestCase):
 
     def test_mcp_template_uses_pinned_packages_and_env_expansion(self) -> None:
         payload = json.loads(Path(REPO_ROOT, "mcp-template.json").read_text(encoding="utf-8"))
-        context7_args = payload["mcpServers"]["context7"]["args"]
-        exa_args = payload["mcpServers"]["exa"]["args"]
-        self.assertIn("@upstash/context7-mcp@2.1.4", context7_args)
-        self.assertIn("exa-mcp-server@3.1.9", exa_args)
+        self.assertEqual(payload["mcpServers"]["context7"]["command"], "context7-mcp")
+        self.assertEqual(payload["mcpServers"]["exa"]["command"], "exa-mcp-server")
         self.assertEqual(payload["mcpServers"]["exa"]["env"]["EXA_API_KEY"], "${EXA_API_KEY:-}")
 
     def test_settings_uses_external_hook_script(self) -> None:

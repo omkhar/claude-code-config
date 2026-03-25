@@ -9,11 +9,18 @@ Do not fetch raw config files from GitHub and do not install from remote content
 Look for a local repo checkout in this order:
 
 1. The current working directory, if it contains `scripts/install.sh` and `policy/install-manifest.json`
+   and its git remote URL resolves to `trailofbits/claude-code-config`
 2. `~/src/claude-code-config`
 3. `~/code/claude-code-config`
 4. `~/src/github.com/trailofbits/claude-code-config`
 
-If no local checkout exists, stop and tell the user to clone or update the repo locally first. Do not improvise a remote install path.
+Treat the current directory as trusted only if:
+
+- `git rev-parse --show-toplevel` resolves successfully
+- the top-level directory name is `claude-code-config`
+- `git remote get-url origin` or `git remote get-url upstream` resolves to the Trail of Bits repo
+
+If no trusted local checkout exists, stop and tell the user to clone or update the repo locally first. Do not improvise a remote install path.
 
 ## Managed components
 

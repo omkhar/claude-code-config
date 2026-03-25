@@ -137,9 +137,9 @@ def pushes_default_branch(command: str, project_dir: str | None) -> bool:
 def has_download_exec(command: str) -> bool:
     """Detect common curl/wget download-and-exec shapes."""
     patterns = (
-        r"curl[^|>]*\|\s*(bash|sh)\b",
-        r"wget[^|>]*\|\s*(bash|sh)\b",
-        r"(bash|sh)\s+-c\s+['\"][^'\"]*(curl|wget)",
+        r"curl[^|>]*\|\s*(bash|sh|zsh)\b",
+        r"wget[^|>]*\|\s*(bash|sh|zsh)\b",
+        r"(bash|sh|zsh)\s+-c\s+['\"][^'\"]*(curl|wget)",
         r"source\s+<\([^)]*(curl|wget)",
         r"<\([^)]*(curl|wget)[^)]*\)",
     )
@@ -148,10 +148,7 @@ def has_download_exec(command: str) -> bool:
 
 def reads_secret_paths(command: str) -> bool:
     """Detect obvious reads of sensitive host paths."""
-    if not any(marker in command for marker in SECRET_PATH_MARKERS):
-        return False
-    readers = ("cat ", "tar ", "rsync ", "scp ", "python", "ruby ", "perl ", "node ")
-    return any(reader in command for reader in readers)
+    return any(marker in command for marker in SECRET_PATH_MARKERS)
 
 
 def writes_shell_config(command: str) -> bool:

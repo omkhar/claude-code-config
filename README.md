@@ -131,9 +131,15 @@ Shipped hooks:
 
 [`mcp-template.json`](mcp-template.json) is pinned and env-based:
 
-- `@upstash/context7-mcp@2.1.4`
-- `exa-mcp-server@3.1.9`
+- `context7-mcp` installed from `@upstash/context7-mcp@2.1.4`
+- `exa-mcp-server` installed from `exa-mcp-server@3.1.9`
 - Exa auth comes from `EXA_API_KEY`, not an inline secret in `~/.mcp.json`
+
+Install the pinned MCP binaries once, then let Claude Code invoke those local commands:
+
+```bash
+npm install -g @upstash/context7-mcp@2.1.4 exa-mcp-server@3.1.9
+```
 
 Install or merge the template with:
 
