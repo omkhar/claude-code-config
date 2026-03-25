@@ -1,0 +1,19 @@
+{
+  "disableBypassPermissionsMode": "disable",
+  "enableAllProjectMcpServers": false,
+  "permissions": {
+    "deny": [
+      "Bash(curl *|bash*)",
+      "Bash(curl *|sh*)",
+      "Bash(wget *|bash*)",
+      "Bash(wget *|sh*)",
+      "Read(~/.mcp.json)",
+      "Read(~/.netrc)",
+      "Read(~/.config/gcloud/**)",
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./.mcp.json)",
+      "Read(./secrets/**)"
+    ]
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "components": [
+    {
+      "id": "settings",
+      "label": "settings.json",
+      "description": "permissions, hooks, telemetry, and statusline config",
+      "sources": [
+        "settings.json"
+      ],
+      "target": "~/.claude/settings.json",
+      "strategy": "merge-json"
+    },
+    {
+      "id": "claude-md",
+      "label": "CLAUDE.md",
+      "description": "global development standards and tool preferences",
+      "sources": [
+        "claude-md-template.md"
+      ],
+      "target": "~/.claude/CLAUDE.md",
+      "strategy": "copy-if-absent"
+    },
+    {
+      "id": "mcp",
+      "label": "MCP servers",
+      "description": "Context7 and Exa MCP server entries",
+      "sources": [
+        "mcp-template.json"
+      ],
+      "target": "~/.mcp.json",
+      "strategy": "merge-mcp-json"
+    },
+    {
+      "id": "statusline",
+      "label": "Statusline script",
+      "description": "two-line status bar with context and cost tracking",
+      "sources": [
+        "scripts/statusline.sh"
+      ],
+      "target": "~/.claude/statusline.sh",
+      "strategy": "copy-executable"
+    },
+    {
+      "id": "hook-helpers",
+      "label": "Hook helper scripts",
+      "description": "shared PreToolUse policy helpers for risky commands",
+      "sources": [
+        "hooks/pre-bash-guard.py",
+        "scripts/lib/bash_guard.py",
+        "hooks/enforce-package-manager.sh",
+        "hooks/log-gam.sh"
+      ],
+      "target_dir": "~/.claude/hooks",
+      "strategy": "copy-dir"
+    },
+    {
+      "id": "review-pr",
+      "label": "review-pr command",
+      "description": "multi-agent PR review workflow",
+      "sources": [
+        "commands/review-pr.md"
+      ],
+      "target": "~/.claude/commands/review-pr.md",
+      "strategy": "copy"
+    },
+    {
+      "id": "fix-issue",
+      "label": "fix-issue command",
+      "description": "end-to-end issue fixing workflow",
+      "sources": [
+        "commands/fix-issue.md"
+      ],
+      "target": "~/.claude/commands/fix-issue.md",
+      "strategy": "copy"
+    },
+    {
+      "id": "merge-dependabot",
+      "label": "merge-dependabot command",
+      "description": "batched dependabot review and merge workflow",
+      "sources": [
+        "commands/merge-dependabot.md"
+      ],
+      "target": "~/.claude/commands/merge-dependabot.md",
+      "strategy": "copy"
+    }
+  ],
+  "self_install": {
+    "source": ".claude/commands/trailofbits/config.md",
+    "target": "~/.claude/commands/trailofbits/config.md"
+  }
+}

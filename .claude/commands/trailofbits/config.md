@@ -1,47 +1,54 @@
 You are installing or updating Trail of Bits' Claude Code configuration into the user's `~/.claude/` directory.
 
-## Source files
+## Local-first rule
 
-Fetch each file from GitHub using WebFetch. The base URL is:
+Do not fetch raw config files from GitHub and do not install from remote content. This command must use a local checkout of `trailofbits/claude-code-config` so the user can inspect, diff, test, and validate what gets installed.
 
-```
-https://raw.githubusercontent.com/trailofbits/claude-code-config/main/
-```
+## Find the local checkout
 
-Files to fetch when needed:
-- `settings.json`
-- `claude-md-template.md`
-- `mcp-template.json`
-- `scripts/statusline.sh`
-- `commands/review-pr.md`
-- `commands/fix-issue.md`
+Look for a local repo checkout in this order:
+
+1. The current working directory, if it contains `scripts/install.sh` and `policy/install-manifest.json`
+2. `~/src/claude-code-config`
+3. `~/code/claude-code-config`
+4. `~/src/github.com/trailofbits/claude-code-config`
+
+If no local checkout exists, stop and tell the user to clone or update the repo locally first. Do not improvise a remote install path.
+
+## Managed components
+
+- **settings.json** — permissions, hooks, telemetry, and statusline config
+- **CLAUDE.md** — global development standards and tool preferences
+- **MCP servers** — pinned Context7 and Exa entries
+- **Statusline script** — two-line status bar with context and cost tracking
+- **Hook helper scripts** — tested Bash guard plus optional helper examples
+- **review-pr command** — installs `commands/review-pr.md`
+- **fix-issue command** — installs `commands/fix-issue.md`
+- **merge-dependabot command** — installs `commands/merge-dependabot.md`
 
 ## Steps
 
-1. **Inventory what exists.** Read `~/.claude/settings.json`, `~/.claude/CLAUDE.md`, `~/.mcp.json`, `~/.claude/statusline.sh`, and check for `~/.claude/commands/review-pr.md` and `~/.claude/commands/fix-issue.md`. Note which files exist and which don't.
+1. Read `policy/install-manifest.json` from the local checkout so you know exactly what the repo ships.
+2. Inventory the current install state with `./scripts/doctor.sh`.
+3. Install all managed components with:
 
-2. **Ask the user what to install.** Use AskUserQuestion with a single multi-select question. List each component with a short description. Pre-label components that are missing from `~/.claude/` as recommended. Components:
-   - **settings.json** — permissions, hooks, telemetry, statusline config
-   - **CLAUDE.md** — global development standards and tool preferences
-   - **MCP servers** — Context7, Exa, Granola
-   - **Statusline script** — two-line status bar with context/cost tracking
-   - **review-pr command** — multi-agent PR review workflow
-   - **fix-issue command** — end-to-end issue fixing workflow
+   ```bash
+   ./scripts/install.sh --all
+   ```
 
-3. **Fetch selected files.** Use WebFetch to download only the files needed for the user's selections from the GitHub URLs above. Extract the raw file content from each response.
+4. If the user explicitly wants to overwrite an existing `~/.claude/CLAUDE.md`, rerun the installer with:
 
-4. **For each selected component, install it:**
+   ```bash
+   ./scripts/install.sh --component claude-md --force-claude-md
+   ```
 
-   - **settings.json**: If `~/.claude/settings.json` doesn't exist, write it directly. If it does exist, read both files and merge the repo's keys into the existing file — preserve any user keys that don't conflict. Show the user the merged result and ask for confirmation before writing.
+5. Re-run:
 
-   - **CLAUDE.md**: If `~/.claude/CLAUDE.md` doesn't exist, write the fetched `claude-md-template.md` content to `~/.claude/CLAUDE.md`. If it already exists, tell the user it exists and ask whether to overwrite, skip, or show a diff. Never silently overwrite CLAUDE.md — it likely has personal customizations.
+   ```bash
+   ./scripts/doctor.sh
+   ```
 
-   - **MCP servers**: If `~/.mcp.json` doesn't exist, write the fetched template to `~/.mcp.json` and remind the user to replace `your-exa-api-key-here`. If it exists, read it, merge any missing server entries from the template, and show the result before writing.
-
-   - **Statusline script**: Write to `~/.claude/statusline.sh` and `chmod +x` it. Safe to overwrite — it has no user customization.
-
-   - **Commands**: Write to `~/.claude/commands/review-pr.md` and/or `~/.claude/commands/fix-issue.md`. Create the directory if needed. Safe to overwrite.
-
-5. **Self-install.** After completing the user's selections, also install this setup command itself to `~/.claude/commands/trailofbits/config.md` so the user can run `/trailofbits:config` from any directory in the future without needing the repo cloned.
-
-6. **Post-install.** Summarize what was installed/updated. If MCP servers were installed, remind the user about the Exa API key. If CLAUDE.md was installed, suggest they review and customize it.
+6. Summarize what was installed or updated, and call out any warnings. In particular:
+   - remind the user that Exa auth comes from `EXA_API_KEY`
+   - mention if `CLAUDE.md` was preserved instead of overwritten
+   - mention if required local tools are missing

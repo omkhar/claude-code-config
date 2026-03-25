@@ -497,7 +497,17 @@ For each work unit with a **PASS** verdict, in order:
      --body "Automated evaluation: build, tests, and transitive dependency analysis passed."
    ```
 
-2. Force merge as admin:
+2. Merge with the normal repository policy first:
+   ```bash
+   gh pr merge --repo $REPO --squash {number}
+   ```
+
+   Only fall back to an admin merge when both of these are true:
+   - the operator explicitly sets `ALLOW_ADMIN_MERGE=1`
+   - the PR is blocked by repository mergeability state rather than failing checks
+
+   In that case, re-check the latest head SHA and required statuses, then run:
+
    ```bash
    gh pr merge --repo $REPO --squash --admin {number}
    ```

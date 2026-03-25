@@ -82,8 +82,7 @@ git diff <upstream-remote>/<base-branch>...HEAD > /tmp/pr-review-diff.txt
 
 # Pipe prompt via stdin to avoid shell metacharacter issues
 cat /tmp/pr-review-prompt.txt | gemini -p - \
-  -m gemini-3-pro-preview \
-  --yolo
+  -m gemini-3-pro-preview
 ```
 
 - Uses stdin (`-p -`) instead of heredoc to avoid shell
@@ -128,6 +127,8 @@ the PR. If you spot a problem, fix it before proceeding.
 ## 3. Verify
 
 ### 3a. Discover project checks (CI is the source of truth)
+
+If `./scripts/validate-repo.sh` exists at the repo root, run it first. Treat it as the fastest repo-local preflight and use it to catch custom validation rules before you expand into CI workflow discovery.
 
 Before running anything, read the project's CI configuration to
 learn what the project *actually* runs. This takes priority over
