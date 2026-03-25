@@ -26,6 +26,7 @@ class RepoContractTests(unittest.TestCase):
         self.assertIn("./scripts/install.sh", command)
         self.assertNotIn("raw.githubusercontent.com", command)
         self.assertNotIn("WebFetch", command)
+        self.assertNotIn("The current working directory", command)
 
     def test_mcp_template_uses_pinned_packages_and_env_expansion(self) -> None:
         payload = json.loads(Path(REPO_ROOT, "mcp-template.json").read_text(encoding="utf-8"))

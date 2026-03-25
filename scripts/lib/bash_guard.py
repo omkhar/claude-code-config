@@ -10,9 +10,11 @@ import shlex
 import subprocess
 import sys
 from collections.abc import Iterable
+from pathlib import Path
 
 DEFAULT_BRANCHES = {"main", "master"}
 SHELL_WRAPPERS = {"bash", "sh", "zsh"}
+HOME_DIR = Path.home().as_posix()
 SECRET_PATH_MARKERS = (
     "~/.ssh/",
     "~/.aws/",
@@ -23,6 +25,16 @@ SECRET_PATH_MARKERS = (
     "~/.config/gcloud/",
     "~/.zshrc",
     "~/.bashrc",
+)
+PATHLIB_SECRET_MARKERS = (
+    ".mcp.json",
+    ".aws/credentials",
+    ".config/gcloud",
+    ".config/gh",
+    ".ssh/",
+    ".gnupg/",
+    ".zshrc",
+    ".bashrc",
 )
 
 
@@ -46,6 +58,14 @@ def strip_env_prefix(tokens: list[str]) -> list[str]:
             continue
         break
     return tokens[index:]
+
+
+def normalize_home_paths(command: str) -> str:
+    """Normalize HOME references so policy checks catch equivalent spellings."""
+    normalized = command.replace("${HOME}", "~").replace("$HOME", "~")
+    if HOME_DIR:
+        normalized = normalized.replace(HOME_DIR, "~")
+    return normalized
 
 
 def unwrap_shell_command(command: str) -> list[str]:
@@ -136,24 +156,35 @@ def pushes_default_branch(command: str, project_dir: str | None) -> bool:
 
 def has_download_exec(command: str) -> bool:
     """Detect common curl/wget download-and-exec shapes."""
+    normalized = normalize_home_paths(command)
     patterns = (
-        r"curl[^|>]*\|\s*(bash|sh|zsh)\b",
-        r"wget[^|>]*\|\s*(bash|sh|zsh)\b",
-        r"(bash|sh|zsh)\s+-c\s+['\"][^'\"]*(curl|wget)",
+        r"curl[^|>]*\|\s*(?:[^\s|]+/)?(?:bash|sh|zsh)\b",
+        r"wget[^|>]*\|\s*(?:[^\s|]+/)?(?:bash|sh|zsh)\b",
+        r"(?:[^\s]+/)?(?:bash|sh|zsh)\s+-c\s+['\"][^'\"]*(curl|wget)",
         r"source\s+<\([^)]*(curl|wget)",
         r"<\([^)]*(curl|wget)[^)]*\)",
     )
-    return any(re.search(pattern, command) is not None for pattern in patterns)
+    return any(re.search(pattern, normalized) is not None for pattern in patterns)
 
 
 def reads_secret_paths(command: str) -> bool:
     """Detect obvious reads of sensitive host paths."""
-    return any(marker in command for marker in SECRET_PATH_MARKERS)
+    normalized = normalize_home_paths(command)
+    if any(marker in normalized for marker in SECRET_PATH_MARKERS):
+        return True
+    return ("Path.home()" in normalized or "pathlib.Path.home()" in normalized) and any(
+        marker in normalized for marker in PATHLIB_SECRET_MARKERS
+    )
 
 
 def writes_shell_config(command: str) -> bool:
     """Detect shell-profile writes or appends."""
-    return re.search(r"(>>|>|tee\s+-a|tee\s+)\s*~/(?:\.zshrc|\.bashrc)", command) is not None
+    normalized = normalize_home_paths(command)
+    if re.search(r"(>>|>|tee\s+-a|tee\s+)\s*~/(?:\.zshrc|\.bashrc)", normalized) is not None:
+        return True
+    return ("Path.home()" in normalized or "pathlib.Path.home()" in normalized) and any(
+        marker in normalized for marker in (".zshrc", ".bashrc")
+    )
 
 
 def package_manager_violation(command: str, project_dir: str | None) -> str | None:
