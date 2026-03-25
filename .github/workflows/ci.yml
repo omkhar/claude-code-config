@@ -16,6 +16,6 @@ jobs:
       - name: Install shell tooling
         run: |
           sudo apt-get update
-          sudo apt-get install -y shellcheck shfmt
+          sudo apt-get install -y python3-coverage shellcheck shfmt
       - name: Validate repository
         run: ./scripts/validate-repo.sh
