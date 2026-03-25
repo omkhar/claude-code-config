@@ -77,6 +77,8 @@ to search for solutions rather than spinning.
 
 ### 5a. Discover project checks (CI is the source of truth)
 
+If `./scripts/validate-repo.sh` exists at the repo root, run it first. Treat it as the fastest repo-local preflight and use it to catch custom validation rules before you expand into CI workflow discovery.
+
 Before running anything, read the project's CI configuration to
 learn what the project *actually* runs. This takes priority over
 the fallback tables below.
